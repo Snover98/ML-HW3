@@ -5,7 +5,6 @@ import sklearn
 from imputation import *
 import cleansing
 from standartisation import *
-from sklearn.tree import DecisionTreeClassifier
 
 
 def prepare_data():
@@ -40,11 +39,11 @@ def prepare_data():
     valid = scaler.scale(valid)
     test = scaler.scale(test)
 
-    train[features].to_csv('train_processed.csv', index=False)
-    valid[features].to_csv('valid_processed.csv', index=False)
-    test[features].to_csv('test_processed.csv', index=False)
+    train[features + ['Vote']].to_csv('train_processed.csv', index=False)
+    valid[features + ['Vote']].to_csv('valid_processed.csv', index=False)
+    test[features + ['Vote']].to_csv('test_processed.csv', index=False)
 
-    return train[features], valid[features], test[features]
+    return train[features + ['Vote']], valid[features + ['Vote']], test[features + ['Vote']]
 
 
 if __name__ == "__main__":

@@ -32,3 +32,13 @@ class probably_vote:
             if row[party] > self.threshold:
                 will_vote.append(idx)
         return df.iloc[will_vote, :]
+
+
+def split_lab_exam(df: pd.DataFrame):
+    featuers = []
+    for col in df:
+        if col != "Vote":
+            featuers.append(col)
+    labels = df["Vote"]
+    exampels = df[featuers]
+    return labels, exampels

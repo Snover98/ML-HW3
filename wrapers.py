@@ -17,17 +17,18 @@ class major_wraper:
         return np.argmax(results)
 
 
-class pick_model:
-    def __init__(self, models):
-        self.models = models
+class probably_vote:
+    def __init__(self, model, threshold: int):
+        self.model = model
+        self.threshold = threshold
 
     def fit_train(self, x_train_set: pd.DataFrame, y_train_set: pd.DataFrame):
-        for model in self.models:
-            model.fit(x_train_set, y_train_set)
+        self.model.fit(x_train_set, y_train_set)
 
-    def choose_best(self, validation_set: pd.DataFrame,num_folds):
-        best_acc = 0
-        best_model = self.models[0]
-        kf = KFold(n_splits=num_folds)
-        for model in self.models:
-            acc =
+    def prob_vote(self, df: pd.DataFrame, party: int):
+        will_vote = []
+        probs_predictions = self.model.predict_proba(df)
+        for idx, row in enumerate(probs_predictions):
+            if row[party] > self.threshold:
+                will_vote.append(idx)
+        return df.iloc[will_vote, :]

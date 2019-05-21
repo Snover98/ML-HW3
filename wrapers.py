@@ -62,8 +62,10 @@ def choose_best_model(models, df: pd.DataFrame, num_folds: int):
     best_acc = 0
     best_model = models[0]
     for model in models:
-        acc = cross_valid(model, df, num_folds)
+        labels, exampels = split_lab_exam(df)
+        pred = model.predict(exampels)
+        acc = sum(labels == pred) / len(labels)
         if acc > best_acc:
-            best_acc = acc
-            best_model = model
+            best_acc=acc
+            best_model=model
     return best_model

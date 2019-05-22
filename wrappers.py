@@ -13,8 +13,7 @@ class ElectionsResultsWrapper:
         self.targets.sort()
 
     def predict(self, pred_set: pd.DataFrame):
-        probs_predictions = self.model.predict_proba(pred_set)
-        results = np.sum(probs_predictions, axis=0)
+        results = self.predict_proba(pred_set)
         return self.targets[np.argmax(results)]
 
     def predict_proba(self, pred_set: pd.DataFrame):

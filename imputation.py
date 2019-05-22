@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-import feat_selection as fs
 
 
 def median_imputation(feature: str, df: pd.DataFrame, df2: pd.DataFrame = None):

@@ -29,7 +29,7 @@ def prepare_data():
 
     features: List[str] = train.columns.to_numpy().tolist()
     selected_features = ["Avg_environmental_importance", "Avg_government_satisfaction", "Avg_education_importance",
-                         "Avg_monthly_expense_on_pets_or_plants", "Avg residancy altitude", "Yearly_ExpensesK",
+                         "Avg_monthly_expense_on_pets_or_plants", "Avg_Residancy_Altitude", "Yearly_ExpensesK",
                          "Weighted_education_rank", "Number_of_valued_Kneset_members"]
     features = [feat for feat in features if feat.startswith("Issue")] + selected_features
 

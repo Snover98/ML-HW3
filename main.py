@@ -7,13 +7,14 @@ import scipy
 
 
 class LogUniform:
-    def __init__(self, low=0, high=1, size=None):
+    def __init__(self, low=0, high=1, size=None, base=10):
         self.low = low
         self.high = high
         self.size = size
+        self.base = base
 
     def rvs(self):
-        return np.exp(np.random.uniform(self.low, self.high, self.size))
+        return np.power(self.base, np.random.uniform(self.low, self.high, self.size))
 
 
 def main():

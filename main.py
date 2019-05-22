@@ -20,7 +20,7 @@ class LogUniform:
 
 
 def wrapper_params(params: dict, to_add: dict = {}):
-    new_params = {'model__' + key: item for key, item in params.items()}
+    new_params = {'model__' + key: value for key, value in params.items()}
     new_params.update(to_add)
     return new_params
 

@@ -31,5 +31,4 @@ class LikelyVotersWrapper:
     def predict(self, df: pd.DataFrame, party: int):
         probs_predictions = self.model.predict_proba(df)
 
-        return [idx for idx, row in enumerate(probs_predictions) if row[party] > self.threshold]
-
+        return [idx for count, (idx, _) in enumerate(df.iterrows()) if probs_predictions[count] > self.threshold]

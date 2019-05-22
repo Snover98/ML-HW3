@@ -45,14 +45,45 @@ def main():
         'tol': LogUniform(low=-10, high=0)
     }
 
+    # normal problem
+    # SVC
     svc_normal = SVC(probability=True, class_weight='balanced')
-    rand_forest_normal = RandomForestClassifier(class_weight='balanced')
-
     svc_grid_normal = RandomizedSearchCV(svc_normal, svc_params, scoring=evaluate_voters_division, cv=3)
     svc_grid_normal.fit(train[features], train['Vote'])
 
+    # Random Forest
+    rand_forest_normal = RandomForestClassifier(class_weight='balanced')
     random_forest_normal = RandomizedSearchCV(rand_forest_normal, random_forest_params,
                                               scoring=evaluate_voters_division, cv=3)
     random_forest_normal.fit(train[features], train['Vote'])
+
+    # elections results
+    # SVC
+    svc_elections_results = ElectionsResultsWrapper(SVC(probability=True, class_weight='balanced'))
+    svc_grid_elections_results = RandomizedSearchCV(svc_elections_results, wrapper_params(svc_params),
+                                                    scoring=evaluate_election_winner, cv=3)
+    svc_grid_elections_results.fit(train[features], train['Vote'])
+
+    # Random Forest
+    rand_forest_elections_results = ElectionsResultsWrapper(RandomForestClassifier(class_weight='balanced'))
+    rand_forest_grid_elections_results = RandomizedSearchCV(rand_forest_elections_results,
+                                                            wrapper_params(random_forest_params),
+                                                            scoring=evaluate_election_winner, cv=3)
+    rand_forest_grid_elections_results.fit(train[features], train['Vote'])
+
+    # likely voters
+    threshold_params = {'threshold': [0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85]}
+    # SVC
+    svc_likely_voters = LikelyVotersWrapper(SVC(probability=True, class_weight='balanced'), threshold=0.5)
+    svc_grid_likely_voters = RandomizedSearchCV(svc_likely_voters, wrapper_params(svc_params, threshold_params),
+                                                scoring=evaluate_party_voters, cv=3)
+    svc_grid_likely_voters.fit(train[features], train['Vote'])
+
+    # Random Forest
+    rand_forset_likely_voters = LikelyVotersWrapper(RandomForestClassifier(class_weight='balanced'), 0.5)
+    rand_forset_grid_likely_voters = RandomizedSearchCV(rand_forset_likely_voters,
+                                                        wrapper_params(random_forest_params, threshold_params),
+                                                        scoring=evaluate_party_voters, cv=3)
+    rand_forset_grid_likely_voters.fit(train[features], train['Vote'])
 
     pass

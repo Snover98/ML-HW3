@@ -1,8 +1,9 @@
 import numpy as np
 import pandas as pd
+from sklearn.base import BaseEstimator
 
 
-class ElectionsResultsWrapper:
+class ElectionsResultsWrapper(BaseEstimator):
     def __init__(self, model):
         self.model = model
         self.targets = None
@@ -21,7 +22,7 @@ class ElectionsResultsWrapper:
         return np.sum(probs_predictions, axis=0)
 
 
-class LikelyVotersWrapper:
+class LikelyVotersWrapper(BaseEstimator):
     def __init__(self, model, threshold: float):
         assert 0 < threshold < 1.0
         self.model = model

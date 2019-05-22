@@ -29,10 +29,7 @@ class LikelyVotersWrapper:
         self.model.fit(x_train_set, y_train_set)
 
     def predict(self, df: pd.DataFrame, party: int):
-        will_vote = []
         probs_predictions = self.model.predict_proba(df)
-        for idx, row in enumerate(probs_predictions):
-            if row[party] > self.threshold:
-                will_vote.append(idx)
-        return will_vote
+
+        return [idx for idx, row in enumerate(probs_predictions) if row[party] > self.threshold]
 

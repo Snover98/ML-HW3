@@ -8,12 +8,12 @@ from sklearn.preprocessing import LabelBinarizer
 from numpy.linalg import norm
 
 
-def evaluate_voters_division(estimator, y_true, X) -> float:
+def evaluate_voters_division(estimator, X, y_true) -> float:
     y_pred = estimator.predict(X)
     return accuracy_score(y_true, y_pred)
 
 
-def evaluate_election_winner(estimator, y_true, X) -> float:
+def evaluate_election_winner(estimator, X, y_true) -> float:
     lb = LabelBinarizer()
     lb.fit(y_true)
 
@@ -23,7 +23,7 @@ def evaluate_election_winner(estimator, y_true, X) -> float:
     return -norm(hist_true-hist_pred)
 
 
-def evaluate_party_voters(estimator, y_true, X, party):
+def evaluate_party_voters(estimator, X, y_true, party):
     indices_true = y_true.index[y_true == party]
     indices_pred = estimator.predict(X)
 
@@ -32,7 +32,7 @@ def evaluate_party_voters(estimator, y_true, X, party):
     return np.sqrt((len(true_pos_indices) ** 2) / (len(indices_true) * len(indices_pred)))
 
 
-def evaluate_likely_voters(estimator, y_true, X):
+def evaluate_likely_voters(estimator, X, y_true):
     """
 
     :param estimator: estimator

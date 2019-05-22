@@ -37,5 +37,4 @@ class LikelyVotersWrapper:
         probs_predictions = self.model.predict_proba(df)
         party_idx = np.where(self.targets == party)[0].item()
 
-        return [idx for count, (idx, _) in enumerate(df.iterrows()) if
-                probs_predictions[count, party_idx] > self.threshold]
+        return df.index[np.where(probs_predictions[:, party_idx] > self.threshold)]

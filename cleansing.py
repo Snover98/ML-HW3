@@ -18,9 +18,9 @@ def change_categorials(df: pd.DataFrame):
 
     for col in df:
         if col == "Vote":
-            df[col].astype('category')
+            df[col].astype('category', copy=False)
         else:
-            df[col].astype(float)
+            df[col].astype(float, copy=False)
 
     return df
 

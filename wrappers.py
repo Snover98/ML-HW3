@@ -23,7 +23,7 @@ class ElectionsResultsWrapper(BaseEstimator):
 
 
 class LikelyVotersWrapper(BaseEstimator):
-    def __init__(self, model, threshold: float):
+    def __init__(self, model, threshold: float = 0.75):
         assert 0 < threshold < 1.0
         self.model = model
         self.threshold = threshold

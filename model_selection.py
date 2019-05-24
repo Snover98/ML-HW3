@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import sklearn as sk
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold, RandomizedSearchCV
 from sklearn.utils import resample
 from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import LabelBinarizer
@@ -15,12 +15,12 @@ def evaluate_voters_division(estimator, X, y_true) -> float:
 
 def evaluate_election_winner(estimator, X, y_true) -> float:
     lb = LabelBinarizer()
-    lb.fit(y_true)
+    lb.fit(estimator.targets)
 
     hist_true = np.sum(lb.transform(y_true), axis=0)
     hist_pred = estimator.predict_proba(X)
 
-    return -norm(hist_true-hist_pred)
+    return -norm(hist_true - hist_pred)
 
 
 def evaluate_party_voters(estimator, X, y_true, party):
@@ -87,7 +87,7 @@ def choose_best_model(models, train: pd.DataFrame, valid: pd.DataFrame, eval_fun
 
     train_targets, train_features = target_features_split(train, 'Vote')
     valid_targets, valid_features = target_features_split(valid, 'Vote')
-    
+
     for model in models:
         model.fit(train_features, train_targets)
         score = eval_func(model, valid_features, valid_targets)
@@ -97,3 +97,30 @@ def choose_best_model(models, train: pd.DataFrame, valid: pd.DataFrame, eval_fun
             best_model = model
 
     return best_model
+
+
+def wrapper_params(params: dict, to_add: dict = {}):
+    new_params = {'model__' + key: value for key, value in params.items()}
+    new_params.update(to_add)
+    return new_params
+
+
+def choose_hyper_params(models, params_ranges, eval_func, df, target='Vote', num_folds=3, wrapper=None, to_add={}):
+    used_models = models
+    if wrapper is not None:
+        used_models = [wrapper(model) for model in models]
+
+    y, X = target_features_split(df, target)
+
+    best_models = []
+    for model, params in zip(used_models, params_ranges):
+        print(f'doing model #{len(best_models) + 1}')
+        used_params = params
+        if wrapper is not None:
+            used_params = wrapper_params(params, to_add)
+
+        grid = RandomizedSearchCV(model, used_params, scoring=eval_func, cv=num_folds)
+        grid.fit(X, y)
+        best_models.append(grid.best_estimator_)
+
+    return best_models

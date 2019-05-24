@@ -76,7 +76,7 @@ def cross_valid(model, df: pd.DataFrame, num_folds: int, eval_func):
         test_targets, test_features = df_targets[test_indices], df_features[test_indices]
 
         model.fit(train_features, train_targets)
-        score += eval_func(model, test_targets, test_features)
+        score += eval_func(model, test_features, test_targets)
 
     return score / num_folds
 
@@ -90,7 +90,7 @@ def choose_best_model(models, train: pd.DataFrame, valid: pd.DataFrame, eval_fun
     
     for model in models:
         model.fit(train_features, train_targets)
-        score = eval_func(model, valid_targets, valid_features)
+        score = eval_func(model, valid_features, valid_targets)
 
         if score > best_score:
             best_score = score

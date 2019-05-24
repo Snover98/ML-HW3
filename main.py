@@ -99,11 +99,11 @@ def main():
     problem = 'likely voters'
     print(f'started {problem}')
     threshold_params = {'threshold': uniform(0.5, 0.5)}
-    best_likely_voters_estimators = choose_hyper_params(estimators, params, evaluate_party_voters, train, 'Vote',
+    best_likely_voters_estimators = choose_hyper_params(estimators, params, evaluate_likely_voters, train, 'Vote',
                                                         wrapper=LikelyVotersWrapper, to_add=threshold_params,
                                                         random_state=seed, n_iter=n_iter)
     print_best_hyper_params(best_likely_voters_estimators, problem)
-    best_likely_voters_model = choose_best_model(best_likely_voters_estimators, train, valid, evaluate_party_voters)
+    best_likely_voters_model = choose_best_model(best_likely_voters_estimators, train, valid, evaluate_likely_voters)
     print_best_model(best_likely_voters_model, problem)
 
 

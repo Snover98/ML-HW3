@@ -96,7 +96,7 @@ def main():
                                                         wrapper=LikelyVotersWrapper, to_add=threshold_params)
     print_best_hyper_params(best_likely_voters_estimators, problem)
     best_likely_voters_model = choose_best_model(best_likely_voters_estimators, train, valid, evaluate_party_voters)
-    print_best_model(best_likely_voters_estimators, problem)
+    print_best_model(best_likely_voters_model, problem)
 
 
 if __name__ == '__main__':

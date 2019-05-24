@@ -105,7 +105,7 @@ def wrapper_params(params: dict, to_add: dict = {}):
     return new_params
 
 
-def choose_hyper_params(models, params_ranges, eval_func, df, target='Vote', num_folds=3, wrapper=None, to_add={}):
+def choose_hyper_params(models, params_ranges, eval_func, df, target='Vote', num_folds=3, wrapper=None, to_add={}, random_state=None):
     used_models = models
     if wrapper is not None:
         used_models = [wrapper(model) for model in models]
@@ -119,7 +119,7 @@ def choose_hyper_params(models, params_ranges, eval_func, df, target='Vote', num
         if wrapper is not None:
             used_params = wrapper_params(params, to_add)
 
-        grid = RandomizedSearchCV(model, used_params, scoring=eval_func, cv=num_folds)
+        grid = RandomizedSearchCV(model, used_params, scoring=eval_func, cv=num_folds, random_state=random_state)
         grid.fit(X, y)
         best_models.append(grid.best_estimator_)
 

@@ -36,7 +36,7 @@ def print_best_hyper_params(models, problem: str):
     print('')
 
 
-def print_best_model(model, problem:str):
+def print_best_model(model, problem: str):
     print(f'The best model for the {problem} problem is:')
     print(model)
     print('')
@@ -51,8 +51,11 @@ def main():
 
     features = list(set(train.columns.to_numpy().tolist()).difference({'Vote'}))
 
+    seed = np.random.randint(2 ** 31)
+    print(f'seed is {seed}')
+
     random_forest_params = {
-        'n_estimators': [10, 20, 50, 80, 100, 120],
+        'n_estimators': [50, 80, 100, 120],
         'criterion': ['gini', 'entropy'],
         'min_samples_split': [2, 10, 20, 50],
         'min_samples_leaf': uniform(0, 0.5),
@@ -74,7 +77,8 @@ def main():
     # normal problem
     problem = 'voter classification'
     print(f'started {problem}')
-    best_normal_estimators = choose_hyper_params(estimators, params, evaluate_voters_division, train, 'Vote')
+    best_normal_estimators = choose_hyper_params(estimators, params, evaluate_voters_division, train, 'Vote',
+                                                 random_state=seed)
     print_best_hyper_params(best_normal_estimators, problem)
     best_normal = choose_best_model(best_normal_estimators, train, valid, evaluate_voters_division)
     print_best_model(best_normal, problem)
@@ -83,7 +87,7 @@ def main():
     problem = 'election results'
     print(f'started {problem}')
     best_election_res_estimators = choose_hyper_params(estimators, params, evaluate_election_winner, train, 'Vote',
-                                                       wrapper=ElectionsResultsWrapper)
+                                                       wrapper=ElectionsResultsWrapper, random_state=seed)
     print_best_hyper_params(best_election_res_estimators, problem)
     best_election_res = choose_best_model(best_election_res_estimators, train, valid, evaluate_election_winner)
     print_best_model(best_election_res, problem)
@@ -93,7 +97,8 @@ def main():
     print(f'started {problem}')
     threshold_params = {'threshold': uniform(0.5, 0.5)}
     best_likely_voters_estimators = choose_hyper_params(estimators, params, evaluate_party_voters, train, 'Vote',
-                                                        wrapper=LikelyVotersWrapper, to_add=threshold_params)
+                                                        wrapper=LikelyVotersWrapper, to_add=threshold_params,
+                                                        random_state=seed)
     print_best_hyper_params(best_likely_voters_estimators, problem)
     best_likely_voters_model = choose_best_model(best_likely_voters_estimators, train, valid, evaluate_party_voters)
     print_best_model(best_likely_voters_model, problem)

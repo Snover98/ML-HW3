@@ -25,7 +25,7 @@ def evaluate_election_winner(estimator, X, y_true) -> float:
 
 def evaluate_party_voters(estimator, X, y_true, party):
     indices_true = y_true.index[y_true == party]
-    indices_pred = estimator.predict(X)
+    indices_pred = estimator.predict(X, party)
 
     true_pos_indices = list(set(indices_true).intersection(set(indices_pred)))
 
@@ -40,9 +40,9 @@ def evaluate_likely_voters(estimator, X, y_true):
     :param X: should be valid[features] or something like that
     :return: average score for each party
     """
-    parties = y_true.unique()
+    parties = estimator.targets
 
-    return np.mean([evaluate_party_voters(estimator, y_true, X, party) for party in parties])
+    return np.mean([evaluate_party_voters(estimator, X, y_true, party) for party in parties])
 
 
 def upsample(df: pd.DataFrame, target: str) -> pd.DataFrame:
@@ -67,13 +67,13 @@ def target_features_split(df: pd.DataFrame, target: str):
 
 def cross_valid(model, df: pd.DataFrame, num_folds: int, eval_func):
     kf = StratifiedKFold(n_splits=num_folds)
-    score = -np.inf
+    score = 0
 
     df_targets, df_features = target_features_split(df, 'Vote')
 
     for train_indices, test_indices in kf.split(df_features, df_targets):
-        train_targets, train_features = df_targets[train_indices], df_features[train_indices]
-        test_targets, test_features = df_targets[test_indices], df_features[test_indices]
+        train_targets, train_features = df_targets[train_indices], df_features.iloc[train_indices]
+        test_targets, test_features = df_targets[test_indices], df_features.iloc[test_indices]
 
         model.fit(train_features, train_targets)
         score += eval_func(model, test_features, test_targets)

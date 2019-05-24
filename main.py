@@ -54,6 +54,8 @@ def main():
     seed = np.random.randint(2 ** 31)
     print(f'seed is {seed}')
 
+    n_iter = 15
+
     random_forest_params = {
         'n_estimators': [50, 80, 100, 120],
         'criterion': ['gini', 'entropy'],
@@ -78,7 +80,7 @@ def main():
     problem = 'voter classification'
     print(f'started {problem}')
     best_normal_estimators = choose_hyper_params(estimators, params, evaluate_voters_division, train, 'Vote',
-                                                 random_state=seed)
+                                                 random_state=seed, n_iter=n_iter)
     print_best_hyper_params(best_normal_estimators, problem)
     best_normal = choose_best_model(best_normal_estimators, train, valid, evaluate_voters_division)
     print_best_model(best_normal, problem)
@@ -87,7 +89,8 @@ def main():
     problem = 'election results'
     print(f'started {problem}')
     best_election_res_estimators = choose_hyper_params(estimators, params, evaluate_election_winner, train, 'Vote',
-                                                       wrapper=ElectionsResultsWrapper, random_state=seed)
+                                                       wrapper=ElectionsResultsWrapper, random_state=seed,
+                                                       n_iter=n_iter)
     print_best_hyper_params(best_election_res_estimators, problem)
     best_election_res = choose_best_model(best_election_res_estimators, train, valid, evaluate_election_winner)
     print_best_model(best_election_res, problem)
@@ -98,7 +101,7 @@ def main():
     threshold_params = {'threshold': uniform(0.5, 0.5)}
     best_likely_voters_estimators = choose_hyper_params(estimators, params, evaluate_party_voters, train, 'Vote',
                                                         wrapper=LikelyVotersWrapper, to_add=threshold_params,
-                                                        random_state=seed)
+                                                        random_state=seed, n_iter=n_iter)
     print_best_hyper_params(best_likely_voters_estimators, problem)
     best_likely_voters_model = choose_best_model(best_likely_voters_estimators, train, valid, evaluate_party_voters)
     print_best_model(best_likely_voters_model, problem)

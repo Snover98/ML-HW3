@@ -3,7 +3,7 @@ import pandas as pd
 import sklearn as sk
 from sklearn.model_selection import StratifiedKFold, RandomizedSearchCV
 from sklearn.utils import resample
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, f1_score
 from sklearn.preprocessing import LabelBinarizer
 from numpy.linalg import norm
 
@@ -24,12 +24,12 @@ def evaluate_election_winner(estimator, X, y_true) -> float:
 
 
 def evaluate_party_voters(estimator, X, y_true, party):
-    indices_true = y_true.index[y_true == party]
     indices_pred = estimator.predict(X, party)
+    y_pred = y_true.copy()
+    y_pred[indices_pred] = True
+    y_pred[y_pred.index.difference(indices_pred)] = False
 
-    true_pos_indices = list(set(indices_true).intersection(set(indices_pred)))
-
-    return np.sqrt((len(true_pos_indices) ** 2) / (len(indices_true) * len(indices_pred)))
+    return f1_score(y_true == party, y_pred)
 
 
 def evaluate_likely_voters(estimator, X, y_true):

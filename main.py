@@ -103,7 +103,7 @@ def main():
     best_normal_estimators = choose_hyper_params(estimators, params, evaluate_voters_division, train, 'Vote',
                                                  random_state=seed, n_iter=n_iter)
     print_best_hyper_params(best_normal_estimators, problem)
-    best_normal = choose_best_model(best_normal_estimators, train, valid, evaluate_voters_division)
+    best_normal = choose_best_model(best_normal_estimators, train, valid, evaluate_voters_division, verbose=True)
     print_best_model(best_normal, problem)
 
     # elections results
@@ -113,7 +113,8 @@ def main():
                                                        wrapper=ElectionsResultsWrapper, random_state=seed,
                                                        n_iter=n_iter)
     print_best_hyper_params(best_election_res_estimators, problem)
-    best_election_res = choose_best_model(best_election_res_estimators, train, valid, evaluate_election_winner)
+    best_election_res = choose_best_model(best_election_res_estimators, train, valid, evaluate_election_winner,
+                                          verbose=True)
     print_best_model(best_election_res, problem)
 
     # likely voters
@@ -124,7 +125,8 @@ def main():
                                                         wrapper=LikelyVotersWrapper, to_add=threshold_params,
                                                         random_state=seed, n_iter=n_iter)
     print_best_hyper_params(best_likely_voters_estimators, problem)
-    best_likely_voters_model = choose_best_model(best_likely_voters_estimators, train, valid, evaluate_likely_voters)
+    best_likely_voters_model = choose_best_model(best_likely_voters_estimators, train, valid, evaluate_likely_voters,
+                                                 verbose=True)
     print_best_model(best_likely_voters_model, problem)
 
 

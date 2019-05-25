@@ -85,7 +85,7 @@ def main():
     }
 
     svc_params = {
-        'C': LogUniform(low=-4.0, high=3.0),
+        'C': LogUniform(low=-5.0, high=4.0),
         'kernel': ['linear', 'poly', 'rbf', 'sigmoid'],
         'degree': [3, 4, 5],
         'gamma': ['scale', 'auto'],

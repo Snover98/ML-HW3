@@ -17,7 +17,7 @@ def evaluate_election_winner(estimator, X, y_true) -> float:
     lb = LabelBinarizer()
     lb.fit(estimator.targets)
 
-    hist_true = np.sum(lb.transform(y_true), axis=0)
+    hist_true = y_true.value_counts()
     hist_pred = estimator.predict_proba(X)
 
     return -norm(hist_true - hist_pred)

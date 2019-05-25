@@ -14,12 +14,11 @@ class ElectionsResultsWrapper(BaseEstimator):
         self.targets.sort()
 
     def predict(self, pred_set: pd.DataFrame):
-        results = self.predict_proba(pred_set)
-        return self.targets[np.argmax(results)]
+        return self.predict_proba(pred_set).idxmax()
 
     def predict_proba(self, pred_set: pd.DataFrame):
         probs_predictions = self.model.predict_proba(pred_set)
-        return np.sum(probs_predictions, axis=0)
+        return pd.Series(np.sum(probs_predictions, axis=0), index=self.targets)
 
 
 class LikelyVotersWrapper(BaseEstimator):

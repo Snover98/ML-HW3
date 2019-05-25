@@ -3,9 +3,10 @@ import numpy as np
 from wrappers import *
 from model_selection import *
 from scipy.stats import uniform, expon
-from sklearn.model_selection import RandomizedSearchCV
+from sklearn.metrics import confusion_matrix
 from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier
+from pprint import pprint
 
 
 class LogUniform:
@@ -128,6 +129,45 @@ def main():
     best_likely_voters_model = choose_best_model(best_likely_voters_estimators, train, valid, evaluate_likely_voters,
                                                  verbose=True)
     print_best_model(best_likely_voters_model, problem)
+
+    # data for the final classifier
+    print('============================================')
+    non_test_data = pd.concat((train, valid))
+    best_normal.fit(non_test_data[features], non_test_data['Vote'])
+    test_pred = best_normal.predict(test[features])
+    test_true = test['Vote']
+    conf_matrix = confusion_matrix(test_true, test_pred, non_test_data['Vote'].unique())
+    print('The confusion matrix is:')
+    print(conf_matrix)
+    print('')
+    test_pred.to_csv('test_predictions.csv', index=False)
+
+    # predict elections winners and divisions
+    print('============================================')
+    best_election_res.fit(non_test_data[features], non_test_data['Vote'])
+    pred_election_winner = best_election_res.predict(test[features])
+    true_election_winner = test['Vote'].value_counts().idxmax()
+    print(f'The predicted elections winner is {pred_election_winner} and the actual winner is {true_election_winner}')
+    pred_percantages = best_election_res.predict_proba(train[features]).value_counts() / len(test.index) * 100
+    true_percantages = test['Vote'].value_counts() / len(test.index) * 100
+    print('The predicted distribution of votes across the parties is:')
+    print(pred_percantages)
+    print('The true distribution of votes across the parties is:')
+    print(true_percantages)
+    print('')
+
+    # predict likely voters
+    print('============================================')
+    best_likely_voters_estimators.fit(non_test_data[features], non_test_data['Vote'])
+    pred_likely_voters = {party: list(best_likely_voters_estimators.predict(test[features], party)) for party in
+                          non_test_data['Vote'].unique()}
+    pred_likely_voters.update({'No Party': test.index.difference(sum(pred_likely_voters.values(), []))})
+    actual_voters = {party: test['Vote'].index[test['Vote'] == party] for party in non_test_data['Vote'].unique()}
+    print('Predicted likely voter indices per party:')
+    pprint(pred_likely_voters)
+    print('Actual voter indices per party:')
+    pprint(actual_voters)
+    print('')
 
 
 if __name__ == '__main__':

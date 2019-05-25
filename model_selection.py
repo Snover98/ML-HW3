@@ -106,13 +106,11 @@ def choose_best_model(models, train: pd.DataFrame, valid: pd.DataFrame, eval_fun
     return best_model
 
 
-def wrapper_params(params: dict, to_add: dict = {}):
-    new_params = {'model__' + key: value for key, value in params.items()}
-    new_params.update(to_add)
-    return new_params
+def wrapper_params(params: dict):
+    return {'model__' + key: value for key, value in params.items()}
 
 
-def choose_hyper_params(models, params_ranges, eval_func, df, target='Vote', num_folds=3, wrapper=None, to_add={},
+def choose_hyper_params(models, params_ranges, eval_func, df, target='Vote', num_folds=3, wrapper=None,
                         random_state=None, n_iter=10):
     used_models = models
     if wrapper is not None:
@@ -125,7 +123,7 @@ def choose_hyper_params(models, params_ranges, eval_func, df, target='Vote', num
         print(f'doing model #{len(best_models) + 1}')
         used_params = params
         if wrapper is not None:
-            used_params = wrapper_params(params, to_add)
+            used_params = wrapper_params(params)
 
         grid = RandomizedSearchCV(model, used_params, scoring=eval_func, cv=num_folds, random_state=random_state,
                                   n_iter=n_iter, n_jobs=-1)

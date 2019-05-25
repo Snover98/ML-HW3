@@ -26,6 +26,24 @@ class LogUniform:
         return np.power(self.base, state.uniform(self.low, self.high, self.size))
 
 
+class RandIntMult:
+    def __init__(self, low=0.0, high=1.0, mult=1, size=None):
+        self.low = low
+        self.high = high
+        self.size = size
+        self.mult = mult
+
+    def rvs(self, random_state):
+        if random_state is None:
+            state = np.random
+        elif isinstance(random_state, np.random.RandomState):
+            state = random_state
+        else:
+            state = np.random.RandomState(random_state)
+
+        return np.around(state.uniform(low=self.low, high=self.high, size=self.size) * self.mult).astype(int)
+
+
 def print_best_hyper_params(models, problem: str):
     print('============================================')
     print(f'The best hyper-parameters for the {problem} problem are:')
@@ -57,11 +75,13 @@ def main():
     n_iter = 15
 
     random_forest_params = {
-        'n_estimators': [50, 80, 100, 120],
+        'n_estimators': RandIntMult(low=0.5, high=20.0, mult=100),
         'criterion': ['gini', 'entropy'],
-        'min_samples_split': [2, 10, 20, 50],
-        'min_samples_leaf': uniform(0, 0.5),
-        'max_features': ['auto', 'sqrt', 'log2', None]
+        'min_samples_split': [2, 5, 10],
+        'min_samples_leaf': [1, 2, 4],
+        'max_features': ['auto', 'sqrt', 'log2', None],
+        'bootstrap': [True, False],
+        'max_depth': [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, None]
     }
 
     svc_params = {
@@ -73,7 +93,8 @@ def main():
         'coef0': [0.0, 1.0]
     }
 
-    estimators = [SVC(probability=True, class_weight='balanced'), RandomForestClassifier(class_weight='balanced')]
+    estimators = [SVC(probability=True, class_weight='balanced'),
+                  RandomForestClassifier(class_weight='balanced', n_jobs=-1)]
     params = [svc_params, random_forest_params]
 
     # normal problem

@@ -12,14 +12,26 @@ def evaluate_voters_division(estimator, X, y_true) -> float:
     return balanced_accuracy_score(y_true, y_pred)
 
 
-# def evaluate_election_winner(estimator, X, y_true) -> float:
-#     y_pred = estimator.predict(X)
-#     return accuracy_score(y_true, y_pred)
+def hist_softmax(hist_in: pd.Series, T: float = None):
+    if T is None:
+        T = len(hist_in.index)
+
+    hist = np.exp(hist_in.astype(float) / T)
+    hist = hist / np.sum(hist)
+
+    return hist
+
+
+def evaluate_election_winner(estimator, X, y_true) -> float:
+    hist_true = hist_softmax(y_true.value_counts())
+    hist_pred = hist_softmax(estimator.predict_res(X))
+
+    return -norm(hist_true - hist_pred)
 
 
 def evaluate_election_res(estimator, X, y_true) -> float:
     hist_true = y_true.value_counts()
-    hist_pred = estimator.predict_proba(X)
+    hist_pred = estimator.predict(X)
 
     return -norm(hist_true - hist_pred)
 

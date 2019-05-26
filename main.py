@@ -107,6 +107,17 @@ def main():
     best_normal = choose_best_model(best_normal_estimators, train, valid, evaluate_voters_division, verbose=True)
     print_best_model(best_normal, problem)
 
+    # elections winner
+    problem = 'election winner'
+    print(f'started {problem}')
+    best_election_win_estimators = choose_hyper_params(estimators, params, evaluate_election_winner, train, 'Vote',
+                                                       wrapper=ElectionsResultsWrapper, random_state=seed,
+                                                       n_iter=n_iter)
+    print_best_hyper_params(best_election_win_estimators, problem)
+    best_election_win = choose_best_model(best_election_win_estimators, train, valid, evaluate_election_winner,
+                                          verbose=True)
+    print_best_model(best_election_win, problem)
+
     # elections results
     problem = 'election results'
     print(f'started {problem}')
@@ -140,13 +151,18 @@ def main():
     print('')
     test_pred.to_csv('test_predictions.csv', index=False)
 
-    # predict elections winners and divisions
+    # predict elections winner
     print('============================================')
-    best_election_res.fit(non_test_data[features], non_test_data['Vote'])
-    pred_election_winner = best_election_res.predict(test[features])
+    best_election_win.fit(non_test_data[features], non_test_data['Vote'])
+    pred_election_winner = best_election_win.predict(test[features])
     true_election_winner = test['Vote'].value_counts().idxmax()
     print(f'The predicted elections winner is {pred_election_winner} and the actual winner is {true_election_winner}')
-    pred_percantages = best_election_res.predict_proba(train[features]).value_counts() / len(test.index) * 100
+    print('')
+
+    # predict elections results
+    print('============================================')
+    best_election_res.fit(non_test_data[features], non_test_data['Vote'])
+    pred_percantages = best_election_res.predict(train[features]).value_counts() / len(test.index) * 100
     true_percantages = test['Vote'].value_counts() / len(test.index) * 100
     print('The predicted distribution of votes across the parties is:')
     print(pred_percantages)

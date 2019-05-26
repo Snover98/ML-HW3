@@ -15,23 +15,16 @@ class ElectionsResultsWrapper(BaseEstimator):
         self.targets.sort()
 
     def predict(self, pred_set: pd.DataFrame):
-        return self.predict_proba(pred_set).idxmax()
-
-    def predict_proba(self, pred_set: pd.DataFrame):
         probs_predictions = self.model.predict_proba(pred_set)
         return pd.Series(np.sum(probs_predictions, axis=0), index=self.targets)
 
 
-# class ElectionsWinnerWrapper(BaseEstimator):
-#     def __init__(self, model):
-#         super(ElectionsWinnerWrapper, self).__init__()
-#         self.model = model
-#
-#     def fit(self, x_train_set: pd.DataFrame, y_train_set: pd.DataFrame):
-#         self.model.fit(x_train_set, y_train_set)
-#
-#     def predict(self, pred_set: pd.DataFrame):
-#         return self.model.predict(pred_set).value_counts().idxmax()
+class ElectionsWinnerWrapper(ElectionsResultsWrapper):
+    def predict(self, pred_set: pd.DataFrame):
+        return self.predict_res(pred_set).idxmax()
+
+    def predict_res(self, pred_set: pd.DataFrame):
+        return super(ElectionsWinnerWrapper, self).predict(pred_set)
 
 
 class LikelyVotersWrapper(BaseEstimator):
@@ -60,5 +53,3 @@ class LikelyVotersWrapper(BaseEstimator):
         likely_voters.update({None: list(df.index.difference(sum(likely_voters.values(), [])))})
 
         return likely_voters
-
-

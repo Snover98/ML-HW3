@@ -22,7 +22,7 @@ class ElectionsResultsWrapper(BaseEstimator):
 
 
 class LikelyVotersWrapper(BaseEstimator):
-    def __init__(self, model, threshold: float = 0.65):
+    def __init__(self, model, threshold: float = 0.6):
         assert 0 < threshold < 1.0
         self.model = model
         self.threshold = threshold
@@ -33,8 +33,18 @@ class LikelyVotersWrapper(BaseEstimator):
         self.targets = y_train_set.unique()
         self.targets.sort()
 
-    def predict(self, df: pd.DataFrame, party: str):
-        probs_predictions = self.model.predict_proba(df)
-        party_idx = np.where(self.targets == party)[0].item()
+    def _get_party_likely_voters(self, df: pd.DataFrame, probs_predictions: pd.DataFrame, party: str):
+        return list(df.index[probs_predictions[party] > self.threshold])
 
-        return df.index[np.where(probs_predictions[:, party_idx] > self.threshold)]
+    def predict(self, df: pd.DataFrame, party: str = None):
+        probs_predictions = pd.DataFrame(self.model.predict_proba(df), columns=self.targets)
+
+        if party is not None:
+            return self._get_party_likely_voters(df, probs_predictions, party)
+
+        likely_voters = {tar: self._get_party_likely_voters(df, probs_predictions, tar) for tar in self.targets}
+        likely_voters.update({None: list(df.index.difference(sum(likely_voters.values(), [])))})
+
+        return likely_voters
+
+

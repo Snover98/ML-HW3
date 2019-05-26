@@ -73,7 +73,7 @@ def main():
     seed = np.random.randint(2 ** 31)
     print(f'seed is {seed}')
 
-    n_iter = 15
+    n_iter = 10
 
     random_forest_params = {
         'n_estimators': RandIntMult(low=0.5, high=20.0, mult=100),
@@ -157,9 +157,7 @@ def main():
     # predict likely voters
     print('============================================')
     best_likely_voters_estimators.fit(non_test_data[features], non_test_data['Vote'])
-    pred_likely_voters = {party: list(best_likely_voters_estimators.predict(test[features], party)) for party in
-                          non_test_data['Vote'].unique()}
-    pred_likely_voters.update({'No Party': test.index.difference(sum(pred_likely_voters.values(), []))})
+    pred_likely_voters = best_likely_voters_estimators.predict(test[features])
     actual_voters = {party: test['Vote'].index[test['Vote'] == party] for party in non_test_data['Vote'].unique()}
     print('Predicted likely voter indices per party:')
     pprint(pred_likely_voters)

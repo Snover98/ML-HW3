@@ -4,7 +4,6 @@ import sklearn as sk
 from sklearn.model_selection import StratifiedKFold, RandomizedSearchCV
 from sklearn.utils import resample
 from sklearn.metrics import accuracy_score, f1_score
-from sklearn.preprocessing import LabelBinarizer
 from numpy.linalg import norm
 
 
@@ -14,25 +13,21 @@ def evaluate_voters_division(estimator, X, y_true) -> float:
 
 
 def evaluate_election_winner(estimator, X, y_true) -> float:
-    lb = LabelBinarizer()
-    lb.fit(estimator.targets)
-
     hist_true = y_true.value_counts()
     hist_pred = estimator.predict_proba(X)
 
     return -norm(hist_true - hist_pred)
 
 
-def evaluate_party_voters(estimator, X, y_true, party):
-    indices_pred = estimator.predict(X, party)
+def evaluate_party_voters(indices_pred, y_true: pd.Series):
     y_pred = y_true.copy()
     y_pred[indices_pred] = True
     y_pred[y_pred.index.difference(indices_pred)] = False
 
-    return f1_score(y_true == party, y_pred)
+    return f1_score(y_true, y_pred)
 
 
-def evaluate_likely_voters(estimator, X, y_true):
+def evaluate_likely_voters(estimator, X, y_true: pd.Series):
     """
 
     :param estimator: estimator
@@ -41,8 +36,9 @@ def evaluate_likely_voters(estimator, X, y_true):
     :return: average score for each party
     """
     parties = estimator.targets
+    y_pred = estimator.predict(X)
 
-    return np.mean([evaluate_party_voters(estimator, X, y_true, party) for party in parties])
+    return np.mean([evaluate_party_voters(y_pred[party], y_true == party) for party in parties])
 
 
 def upsample(df: pd.DataFrame, target: str) -> pd.DataFrame:

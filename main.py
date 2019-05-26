@@ -110,11 +110,11 @@ def main():
     # elections results
     problem = 'election results'
     print(f'started {problem}')
-    best_election_res_estimators = choose_hyper_params(estimators, params, evaluate_election_winner, train, 'Vote',
+    best_election_res_estimators = choose_hyper_params(estimators, params, evaluate_election_res, train, 'Vote',
                                                        wrapper=ElectionsResultsWrapper, random_state=seed,
                                                        n_iter=n_iter)
     print_best_hyper_params(best_election_res_estimators, problem)
-    best_election_res = choose_best_model(best_election_res_estimators, train, valid, evaluate_election_winner,
+    best_election_res = choose_best_model(best_election_res_estimators, train, valid, evaluate_election_res,
                                           verbose=True)
     print_best_model(best_election_res, problem)
 
@@ -132,7 +132,7 @@ def main():
     print('============================================')
     non_test_data = pd.concat((train, valid))
     best_normal.fit(non_test_data[features], non_test_data['Vote'])
-    test_pred = best_normal.predict(test[features])
+    test_pred = pd.Series(best_normal.predict(test[features]), index=test.index)
     test_true = test['Vote']
     conf_matrix = confusion_matrix(test_true, test_pred, non_test_data['Vote'].unique())
     print('The confusion matrix is:')

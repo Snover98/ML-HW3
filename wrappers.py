@@ -5,6 +5,7 @@ from sklearn.base import BaseEstimator
 
 class ElectionsResultsWrapper(BaseEstimator):
     def __init__(self, model):
+        super(ElectionsResultsWrapper, self).__init__()
         self.model = model
         self.targets = None
 
@@ -21,9 +22,22 @@ class ElectionsResultsWrapper(BaseEstimator):
         return pd.Series(np.sum(probs_predictions, axis=0), index=self.targets)
 
 
+# class ElectionsWinnerWrapper(BaseEstimator):
+#     def __init__(self, model):
+#         super(ElectionsWinnerWrapper, self).__init__()
+#         self.model = model
+#
+#     def fit(self, x_train_set: pd.DataFrame, y_train_set: pd.DataFrame):
+#         self.model.fit(x_train_set, y_train_set)
+#
+#     def predict(self, pred_set: pd.DataFrame):
+#         return self.model.predict(pred_set).value_counts().idxmax()
+
+
 class LikelyVotersWrapper(BaseEstimator):
     def __init__(self, model, threshold: float = 0.6):
         assert 0 < threshold < 1.0
+        super(LikelyVotersWrapper, self).__init__()
         self.model = model
         self.threshold = threshold
         self.targets = None

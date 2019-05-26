@@ -3,16 +3,21 @@ import pandas as pd
 import sklearn as sk
 from sklearn.model_selection import StratifiedKFold, RandomizedSearchCV
 from sklearn.utils import resample
-from sklearn.metrics import accuracy_score, f1_score
+from sklearn.metrics import accuracy_score, f1_score, balanced_accuracy_score
 from numpy.linalg import norm
 
 
 def evaluate_voters_division(estimator, X, y_true) -> float:
     y_pred = estimator.predict(X)
-    return accuracy_score(y_true, y_pred)
+    return balanced_accuracy_score(y_true, y_pred)
 
 
-def evaluate_election_winner(estimator, X, y_true) -> float:
+# def evaluate_election_winner(estimator, X, y_true) -> float:
+#     y_pred = estimator.predict(X)
+#     return accuracy_score(y_true, y_pred)
+
+
+def evaluate_election_res(estimator, X, y_true) -> float:
     hist_true = y_true.value_counts()
     hist_pred = estimator.predict_proba(X)
 

@@ -46,7 +46,6 @@ class RandIntMult:
 
 
 def print_best_hyper_params(models, problem: str):
-    print('============================================')
     print(f'The best hyper-parameters for the {problem} problem are:')
     print('')
     for model in models:
@@ -72,6 +71,7 @@ def main():
 
     seed = np.random.randint(2 ** 31)
     print(f'seed is {seed}')
+    print('')
 
     n_iter = 10
 
@@ -99,6 +99,7 @@ def main():
     params = [svc_params, random_forest_params]
 
     # normal problem
+    print('============================================')
     problem = 'voter classification'
     print(f'started {problem}')
     best_normal_estimators = choose_hyper_params(estimators, params, evaluate_voters_division, train, 'Vote',
@@ -108,6 +109,7 @@ def main():
     print_best_model(best_normal, problem)
 
     # elections winner
+    print('============================================')
     problem = 'election winner'
     print(f'started {problem}')
     best_election_win_estimators = choose_hyper_params(estimators, params, evaluate_election_winner, train, 'Vote',
@@ -118,6 +120,7 @@ def main():
     print_best_model(best_election_win, problem)
 
     # elections results
+    print('============================================')
     problem = 'election results'
     print(f'started {problem}')
     best_election_res_estimators = choose_hyper_params(estimators, params, evaluate_election_res, train, 'Vote',
@@ -129,6 +132,7 @@ def main():
     print_best_model(best_election_res, problem)
 
     # likely voters
+    print('============================================')
     problem = 'likely voters'
     print(f'started {problem}')
     best_likely_voters_estimators = choose_hyper_params(estimators, params, evaluate_likely_voters, train, 'Vote',

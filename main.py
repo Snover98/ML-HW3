@@ -111,8 +111,7 @@ def main():
     problem = 'election winner'
     print(f'started {problem}')
     best_election_win_estimators = choose_hyper_params(estimators, params, evaluate_election_winner, train, 'Vote',
-                                                       wrapper=ElectionsResultsWrapper, random_state=seed,
-                                                       n_iter=n_iter)
+                                                       wrapper=ElectionsWinnerWrapper, random_state=seed, n_iter=n_iter)
     print_best_hyper_params(best_election_win_estimators, problem)
     best_election_win = choose_best_model(best_election_win_estimators, train, valid, evaluate_election_winner,
                                           verbose=True)

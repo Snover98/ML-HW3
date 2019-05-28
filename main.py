@@ -105,6 +105,25 @@ def print_best_model(model, problem: str):
     print('')
 
 
+def find_problem_best_model(train, valid, estimators, params, problem, eval_func, wrapper, n_iter=10, seed=None,
+                            search_hyper_params=True, verbose=False):
+    # normal problem
+    print('============================================')
+    print(f'started {problem}')
+    if search_hyper_params:
+        best_estimators = choose_hyper_params(estimators, params, eval_func, train, 'Vote', random_state=seed,
+                                              n_iter=n_iter, wrapper=wrapper)
+        save_problem_hyper_params(best_estimators, problem)
+    else:
+        best_estimators = load_problem_hyper_params(estimators, problem, verbose=verbose)
+
+    print_best_hyper_params(best_estimators, problem)
+    best_estimator = choose_best_model(best_estimators, valid, evaluate_voters_division, verbose=verbose)
+    print_best_model(best_estimator, problem)
+
+    return best_estimator
+
+
 def find_best_models(train, valid, search_hyper_params=True, verbose=False):
     seed = np.random.randint(2 ** 31)
     print(f'seed is {seed}')
@@ -135,75 +154,16 @@ def find_best_models(train, valid, search_hyper_params=True, verbose=False):
                   RandomForestClassifier(class_weight='balanced', n_jobs=-1)]
     params = [svc_params, random_forest_params]
 
-    # normal problem
-    print('============================================')
-    problem = 'voter classification'
-    print(f'started {problem}')
-    if search_hyper_params:
-        best_normal_estimators = choose_hyper_params(estimators, params, evaluate_voters_division, train, 'Vote',
-                                                     random_state=seed, n_iter=n_iter)
-        save_problem_hyper_params(best_normal_estimators, problem)
-    else:
-        best_normal_estimators = load_problem_hyper_params(estimators, problem, verbose=verbose)
+    problems = ['voter classification', 'election winner', 'election results', 'likely voters']
+    wrappers = [None, ElectionsWinnerWrapper, ElectionsResultsWrapper, LikelyVotersWrapper]
+    eval_funcs = [evaluate_voters_division, evaluate_election_winner, evaluate_election_res, evaluate_likely_voters]
 
-    print_best_hyper_params(best_normal_estimators, problem)
-    best_normal = choose_best_model(best_normal_estimators, valid, evaluate_voters_division, verbose=verbose)
-    print_best_model(best_normal, problem)
+    best_estimators = [
+        find_problem_best_model(train, valid, estimators, params, problem, eval_func, wrapper, n_iter, seed,
+                                search_hyper_params, verbose) for problem, eval_func, wrapper in
+        zip(problems, eval_funcs, wrappers)]
 
-    # elections winner
-    print('============================================')
-    problem = 'election winner'
-    print(f'started {problem}')
-    if search_hyper_params:
-        best_election_win_estimators = choose_hyper_params(estimators, params, evaluate_election_winner, train, 'Vote',
-                                                           wrapper=ElectionsWinnerWrapper, random_state=seed,
-                                                           n_iter=n_iter, verbose=verbose)
-        save_problem_hyper_params(best_election_win_estimators, problem)
-    else:
-        best_election_win_estimators = load_problem_hyper_params(estimators, problem, wrapper=ElectionsWinnerWrapper,
-                                                                 verbose=verbose)
-
-    print_best_hyper_params(best_election_win_estimators, problem)
-    best_election_win = choose_best_model(best_election_win_estimators, valid, evaluate_election_winner,
-                                          verbose=verbose)
-    print_best_model(best_election_win, problem)
-
-    # elections results
-    print('============================================')
-    problem = 'election results'
-    print(f'started {problem}')
-    if search_hyper_params:
-        best_election_res_estimators = choose_hyper_params(estimators, params, evaluate_election_res, train, 'Vote',
-                                                           wrapper=ElectionsResultsWrapper, random_state=seed,
-                                                           n_iter=n_iter, verbose=verbose)
-        save_problem_hyper_params(best_election_res_estimators, problem)
-    else:
-        best_election_res_estimators = load_problem_hyper_params(estimators, problem, wrapper=ElectionsResultsWrapper,
-                                                                 verbose=verbose)
-
-    print_best_hyper_params(best_election_res_estimators, problem)
-    best_election_res = choose_best_model(best_election_res_estimators, valid, evaluate_election_res, verbose=verbose)
-    print_best_model(best_election_res, problem)
-
-    # likely voters
-    print('============================================')
-    problem = 'likely voters'
-    print(f'started {problem}')
-    if search_hyper_params:
-        best_likely_voters_estimators = choose_hyper_params(estimators, params, evaluate_likely_voters, train, 'Vote',
-                                                            wrapper=LikelyVotersWrapper, random_state=seed,
-                                                            n_iter=n_iter, verbose=verbose)
-        save_problem_hyper_params(best_likely_voters_estimators, problem)
-    else:
-        best_likely_voters_estimators = load_problem_hyper_params(estimators, problem, wrapper=LikelyVotersWrapper,
-                                                                  verbose=verbose)
-
-    print_best_hyper_params(best_likely_voters_estimators, problem)
-    best_likely_voters_model = choose_best_model(best_likely_voters_estimators, valid, evaluate_likely_voters,
-                                                 verbose=verbose)
-    print_best_model(best_likely_voters_model, problem)
-
-    return best_normal, best_election_win, best_election_res, best_likely_voters_model
+    return best_estimators
 
 
 def use_estimators(best_estimators, train, valid, test):
@@ -262,7 +222,10 @@ def main():
     valid = pd.read_csv('valid_processed.csv')
     test = pd.read_csv('test_processed.csv')
 
-    best_models = find_best_models(train, valid)
+    verbose = True
+    search_hyper_params = True
+
+    best_models = find_best_models(train, valid, verbose=verbose, search_hyper_params=search_hyper_params)
     use_estimators(best_models, train, valid, test)
 
 

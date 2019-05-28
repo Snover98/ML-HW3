@@ -4,6 +4,7 @@ from sklearn.model_selection import StratifiedKFold, RandomizedSearchCV
 from sklearn.utils import resample
 from sklearn.metrics import f1_score, balanced_accuracy_score
 from numpy.linalg import norm
+from hyper_params_funcs import *
 
 
 def evaluate_voters_division(estimator, X, y_true) -> float:
@@ -149,9 +150,20 @@ def choose_hyper_params(models, params_ranges, eval_func, df, target='Vote', num
     return best_models
 
 
-def get_model_name(model) -> str:
-    model_name: str = model.__repr__().split('(')[0]
-    if model_name.endswith('Wrapper'):
-        model_name = model.model.__repr__().split('(')[0]
+def find_problem_best_model(train, valid, estimators, params, problem, eval_func, wrapper, n_iter=10, seed=None,
+                            search_hyper_params=True, verbose=False):
+    # normal problem
+    print('============================================')
+    print(f'started {problem}')
+    if search_hyper_params:
+        best_estimators = choose_hyper_params(estimators, params, eval_func, train, 'Vote', random_state=seed,
+                                              n_iter=n_iter, wrapper=wrapper)
+        save_problem_hyper_params(best_estimators, problem)
+    else:
+        best_estimators = load_problem_hyper_params(estimators, problem, verbose=verbose)
 
-    return model_name
+    print_best_hyper_params(best_estimators, problem)
+    best_estimator = choose_best_model(best_estimators, valid, evaluate_voters_division, verbose=verbose)
+    print_best_model(best_estimator, problem)
+
+    return best_estimator

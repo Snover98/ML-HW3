@@ -1,6 +1,9 @@
 import pandas as pd
 import numpy as np
 
+""" recieves the election data as input and replaces the values of categorial featuers with numeric representation
+    and make a one hot column for some of the other features, and cahnge the type of every feature to float"""
+
 
 def change_categorials(df: pd.DataFrame):
     cleanup_nums = {"Age_group": {"Below_30": 0, "30-45": 1, "45_and_up": 2},
@@ -25,6 +28,10 @@ def change_categorials(df: pd.DataFrame):
     return df
 
 
+"""recieves the election data and a feature and a range of the feature and drops all exampels that
+   with a feature that isnt in its range or isnt an int when it should be"""
+
+
 def outlier_dropping(feature: int, df: pd.DataFrame, min: int = 0, max: int = np.inf, is_int: bool = False,
                      finite_range=None):
     to_drop = []
@@ -41,6 +48,10 @@ def outlier_dropping(feature: int, df: pd.DataFrame, min: int = 0, max: int = np
 
     df.drop(to_drop, inplace=True)
     return df
+
+
+""" recieves the election data and preforms outlier_dropping for specific featuers that have constrains on them
+    like range or being an int"""
 
 
 def cleanse(df: pd.DataFrame):

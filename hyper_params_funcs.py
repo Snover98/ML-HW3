@@ -1,6 +1,8 @@
 import pickle
 import sklearn as sk
 
+""" recieves an sk model and outputs its name """
+
 
 def get_model_name(model) -> str:
     model_name: str = model.__repr__().split('(')[0]
@@ -10,10 +12,16 @@ def get_model_name(model) -> str:
     return model_name
 
 
+""" recieves an sk model and a problem name and outputs the problem name and model that tries to solve this problem """
+
+
 def model_problem_name(model: sk.base.BaseEstimator, problem: str) -> str:
     model_name: str = get_model_name(model)
 
     return f'{problem}_{model_name}.pickle'
+
+
+""" recieves a model and a problem and saves the model hyper_parameters in the proper file"""
 
 
 def save_model_problem_hyper_params(model: sk.base.BaseEstimator, problem: str):
@@ -21,9 +29,15 @@ def save_model_problem_hyper_params(model: sk.base.BaseEstimator, problem: str):
         pickle.dump(model.get_params, handle)
 
 
+""" recieves a list of model and a problem and saves the models hyper_parameters in the proper file """
+
+
 def save_problem_hyper_params(models, problem: str):
     for model in models:
         save_model_problem_hyper_params(model, problem)
+
+
+""" recieves a model and a problem and loads the models hyper parameters from the file to witch they were last saved"""
 
 
 def load_model_problem_hyper_params(model, problem: str, verbose=False):
@@ -39,8 +53,14 @@ def load_model_problem_hyper_params(model, problem: str, verbose=False):
     model.set_params(**params)
 
 
+""" gets a model and outputs a copy of it"""
+
+
 def copy_model(model):
     return type(model)(**model.get_params())
+
+
+""" loads the hyper parameters of a list of models on some problem to the wrapped models if needed """
 
 
 def load_problem_hyper_params(models, problem: str, wrapper=None, verbose=False):
@@ -54,6 +74,9 @@ def load_problem_hyper_params(models, problem: str, wrapper=None, verbose=False)
     return used_models
 
 
+""" prints the best hyper_params of a a list of models fo a given problem """
+
+
 def print_best_hyper_params(models, problem: str):
     print(f'The best hyper-parameters for the {problem} problem are:')
     print('')
@@ -61,6 +84,9 @@ def print_best_hyper_params(models, problem: str):
         print(model)
         print('')
     print('')
+
+
+""" print the best model to solve the given problem """
 
 
 def print_best_model(model, problem: str):

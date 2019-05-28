@@ -6,6 +6,12 @@ from imputation import *
 import cleansing
 from standartisation import *
 
+""" the total preparing of the data:
+    1. load the data and split it to train set,validation set, test_set
+    2. cleanse the data from not logical examples
+    3. imputate missing values in the data
+    4. leave only the selected featuers """
+
 
 def prepare_data():
     df = loading.load_csv()

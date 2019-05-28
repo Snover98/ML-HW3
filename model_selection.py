@@ -94,23 +94,19 @@ def cross_valid(model, df: pd.DataFrame, num_folds: int, eval_func):
     return score / num_folds
 
 
-def choose_best_model(models, train: pd.DataFrame, valid: pd.DataFrame, eval_func, verbose: bool = False):
+def choose_best_model(models, valid: pd.DataFrame, eval_func, verbose: bool = False):
     best_score = -np.inf
     best_model = None
 
-    train_targets, train_features = target_features_split(train, 'Vote')
+    # train_targets, train_features = target_features_split(train, 'Vote')
     valid_targets, valid_features = target_features_split(valid, 'Vote')
 
     for model in models:
-        model.fit(train_features, train_targets)
+        # model.fit(train_features, train_targets)
         score = eval_func(model, valid_features, valid_targets)
 
         if verbose:
-            model_name: str = model.__repr__().split('(')[0]
-            if model_name.endswith('Wrapper'):
-                model_name = model.model.__repr__().split('(')[0]
-
-            print(f'Model {model_name} has a score of {score}')
+            print(f'Model {get_model_name(model)} has a score of {score}')
 
         if score > best_score:
             best_score = score
@@ -124,7 +120,7 @@ def wrapper_params(params: dict):
 
 
 def choose_hyper_params(models, params_ranges, eval_func, df, target='Vote', num_folds=3, wrapper=None,
-                        random_state=None, n_iter=10):
+                        random_state=None, n_iter=10, verbose=False):
     used_models = models
     if wrapper is not None:
         used_models = [wrapper(model) for model in models]
@@ -133,7 +129,9 @@ def choose_hyper_params(models, params_ranges, eval_func, df, target='Vote', num
 
     best_models = []
     for model, params in zip(used_models, params_ranges):
-        print(f'doing model #{len(best_models) + 1}')
+        if verbose:
+            print(f'Tuning model #{len(best_models) + 1}: {get_model_name(model)}')
+
         used_params = params
         if wrapper is not None:
             used_params = wrapper_params(params)
@@ -144,3 +142,11 @@ def choose_hyper_params(models, params_ranges, eval_func, df, target='Vote', num
         best_models.append(grid.best_estimator_)
 
     return best_models
+
+
+def get_model_name(model) -> str:
+    model_name: str = model.__repr__().split('(')[0]
+    if model_name.endswith('Wrapper'):
+        model_name = model.model.__repr__().split('(')[0]
+
+    return model_name

@@ -1,8 +1,8 @@
+import pandas as pd
+import sklearn as sk
 from data_preperation import prepare_data
-import numpy as np
 from wrappers import *
 from model_selection import *
-from scipy.stats import uniform, expon
 from sklearn.metrics import confusion_matrix
 from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier

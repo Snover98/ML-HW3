@@ -1,9 +1,8 @@
 import numpy as np
 import pandas as pd
-import sklearn as sk
 from sklearn.model_selection import StratifiedKFold, RandomizedSearchCV
 from sklearn.utils import resample
-from sklearn.metrics import accuracy_score, f1_score, balanced_accuracy_score
+from sklearn.metrics import f1_score, balanced_accuracy_score
 from numpy.linalg import norm
 
 
@@ -40,6 +39,12 @@ def evaluate_party_voters(indices_pred, y_true: pd.Series):
     y_pred = y_true.copy()
     y_pred[indices_pred] = True
     y_pred[y_pred.index.difference(indices_pred)] = False
+
+    # in the case that the recall and accuracy are both 0, return the minimal value of 0
+    # this happens when the intersection is empty, which can be seen if the two have no shared True values
+    # and they are not both all False values
+    if 0 == len(y_true.index[y_true].intersection(indices_pred)) < max(len(y_true.index[y_true]), len(indices_pred)):
+        return 0.0
 
     return f1_score(y_true, y_pred)
 

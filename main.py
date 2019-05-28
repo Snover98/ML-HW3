@@ -142,11 +142,11 @@ def find_best_models(train, valid, search_hyper_params=True, verbose=False):
     if search_hyper_params:
         best_normal_estimators = choose_hyper_params(estimators, params, evaluate_voters_division, train, 'Vote',
                                                      random_state=seed, n_iter=n_iter)
+        save_problem_hyper_params(best_normal_estimators, problem)
     else:
         best_normal_estimators = load_problem_hyper_params(estimators, problem, verbose=verbose)
 
     print_best_hyper_params(best_normal_estimators, problem)
-    save_problem_hyper_params(best_normal_estimators, problem)
     best_normal = choose_best_model(best_normal_estimators, valid, evaluate_voters_division, verbose=verbose)
     print_best_model(best_normal, problem)
 
@@ -158,12 +158,12 @@ def find_best_models(train, valid, search_hyper_params=True, verbose=False):
         best_election_win_estimators = choose_hyper_params(estimators, params, evaluate_election_winner, train, 'Vote',
                                                            wrapper=ElectionsWinnerWrapper, random_state=seed,
                                                            n_iter=n_iter, verbose=verbose)
+        save_problem_hyper_params(best_election_win_estimators, problem)
     else:
         best_election_win_estimators = load_problem_hyper_params(estimators, problem, wrapper=ElectionsWinnerWrapper,
                                                                  verbose=verbose)
 
     print_best_hyper_params(best_election_win_estimators, problem)
-    save_problem_hyper_params(best_election_win_estimators, problem)
     best_election_win = choose_best_model(best_election_win_estimators, valid, evaluate_election_winner,
                                           verbose=verbose)
     print_best_model(best_election_win, problem)
@@ -176,12 +176,12 @@ def find_best_models(train, valid, search_hyper_params=True, verbose=False):
         best_election_res_estimators = choose_hyper_params(estimators, params, evaluate_election_res, train, 'Vote',
                                                            wrapper=ElectionsResultsWrapper, random_state=seed,
                                                            n_iter=n_iter, verbose=verbose)
+        save_problem_hyper_params(best_election_res_estimators, problem)
     else:
         best_election_res_estimators = load_problem_hyper_params(estimators, problem, wrapper=ElectionsResultsWrapper,
                                                                  verbose=verbose)
 
     print_best_hyper_params(best_election_res_estimators, problem)
-    save_problem_hyper_params(best_election_res_estimators, problem)
     best_election_res = choose_best_model(best_election_res_estimators, valid, evaluate_election_res, verbose=verbose)
     print_best_model(best_election_res, problem)
 
@@ -193,12 +193,12 @@ def find_best_models(train, valid, search_hyper_params=True, verbose=False):
         best_likely_voters_estimators = choose_hyper_params(estimators, params, evaluate_likely_voters, train, 'Vote',
                                                             wrapper=LikelyVotersWrapper, random_state=seed,
                                                             n_iter=n_iter, verbose=verbose)
+        save_problem_hyper_params(best_likely_voters_estimators, problem)
     else:
         best_likely_voters_estimators = load_problem_hyper_params(estimators, problem, wrapper=LikelyVotersWrapper,
                                                                   verbose=verbose)
 
     print_best_hyper_params(best_likely_voters_estimators, problem)
-    save_problem_hyper_params(best_likely_voters_estimators, problem)
     best_likely_voters_model = choose_best_model(best_likely_voters_estimators, valid, evaluate_likely_voters,
                                                  verbose=verbose)
     print_best_model(best_likely_voters_model, problem)

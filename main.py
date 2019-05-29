@@ -115,7 +115,7 @@ def use_estimators(best_estimators, train, valid, test):
     # predict elections results
     print('============================================')
     best_election_res.fit(non_test_data[features], non_test_data['Vote'])
-    pred_percantages = best_election_res.predict(train[features]).value_counts() / len(test.index) * 100
+    pred_percantages = best_election_res.predict(train[features]) * 100
     true_percantages = test['Vote'].value_counts() / len(test.index) * 100
     print('The predicted distribution of votes across the parties is:')
     print(pred_percantages)

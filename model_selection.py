@@ -23,18 +23,14 @@ def hist_softmax(hist_in: pd.Series, T: float = 1.0):
 
 
 def evaluate_election_winner(estimator, X, y_true) -> float:
-    hist_true = y_true.value_counts()
-    hist_true = hist_softmax(hist_true / np.sum(hist_true.values))
-
+    hist_true = hist_softmax(y_true.value_counts() / len(y_true.index))
     hist_pred = hist_softmax(estimator.predict_res(X))
 
     return -norm(hist_true - hist_pred)
 
 
 def evaluate_election_res(estimator, X, y_true) -> float:
-    hist_true = y_true.value_counts()
-    hist_true = hist_true / np.sum(hist_true)
-
+    hist_true = y_true.value_counts() / len(y_true.index)
     hist_pred = estimator.predict(X)
 
     return -norm(hist_true - hist_pred)

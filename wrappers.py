@@ -16,12 +16,14 @@ class ElectionsResultsWrapper(BaseEstimator):
         self.targets = y_train_set.unique()
         self.targets.sort()
 
-    # predicts the distrebution of votes between partys according to predict_proba
+    # predicts the distribution of votes between parties according to predict_proba
     # witch is a function that computes the probability of the model deciding to classify a voter to a certain party
     # for every voter on the given dataset, and returns the sum of those probs for every party on all examples
+    # we then normalize by the sum the get the distribution
     def predict(self, pred_set: pd.DataFrame):
         probs_predictions = self.model.predict_proba(pred_set)
-        return pd.Series(np.sum(probs_predictions, axis=0), index=self.targets)
+        results = pd.Series(np.sum(probs_predictions, axis=0), index=self.targets)
+        return results / np.sum(results.values)
 
 
 # a wrapper for a model to the problem of predicting the party that wins the election

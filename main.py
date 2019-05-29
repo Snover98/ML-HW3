@@ -71,8 +71,7 @@ def find_best_models(train, valid, search_hyper_params=True, verbose=False):
         'coef0': [0.0, 1.0]
     }
 
-    estimators = [SVC(probability=True, class_weight='balanced'),
-                  RandomForestClassifier(class_weight='balanced', n_jobs=-1)]
+    estimators = [SVC(probability=True, class_weight='balanced'), RandomForestClassifier(class_weight='balanced')]
     params = [svc_params, random_forest_params]
 
     problems = ['voter classification', 'election winner', 'election results', 'likely voters']

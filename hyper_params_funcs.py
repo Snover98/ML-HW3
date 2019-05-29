@@ -26,7 +26,7 @@ def model_problem_name(model: sk.base.BaseEstimator, problem: str) -> str:
 
 def save_model_problem_hyper_params(model: sk.base.BaseEstimator, problem: str):
     with open(model_problem_name(model, problem), 'wb') as handle:
-        pickle.dump(model.get_params, handle)
+        pickle.dump(model.get_params(), handle)
 
 
 """ recieves a list of model and a problem and saves the models hyper_parameters in the proper file """
@@ -41,7 +41,7 @@ def save_problem_hyper_params(models, problem: str):
 
 
 def load_model_problem_hyper_params(model, problem: str, verbose=False):
-    with open(model_problem_name(model, problem), 'wb') as handle:
+    with open(model_problem_name(model, problem), 'rb') as handle:
         params = pickle.load(handle)
 
     if verbose:

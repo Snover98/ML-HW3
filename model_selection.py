@@ -12,7 +12,7 @@ def evaluate_voters_division(estimator, X, y_true) -> float:
     return balanced_accuracy_score(y_true, y_pred)
 
 
-def hist_softmax(hist_in: pd.Series, T: float = None):
+def hist_softmax(hist_in: pd.Series, T: float = 1.0):
     if T is None:
         T = len(hist_in.index)
 
@@ -23,7 +23,9 @@ def hist_softmax(hist_in: pd.Series, T: float = None):
 
 
 def evaluate_election_winner(estimator, X, y_true) -> float:
-    hist_true = hist_softmax(y_true.value_counts())
+    hist_true = y_true.value_counts()
+    hist_true = hist_softmax(hist_true / np.sum(hist_true.values))
+
     hist_pred = hist_softmax(estimator.predict_res(X))
 
     return -norm(hist_true - hist_pred)
@@ -31,6 +33,8 @@ def evaluate_election_winner(estimator, X, y_true) -> float:
 
 def evaluate_election_res(estimator, X, y_true) -> float:
     hist_true = y_true.value_counts()
+    hist_true = hist_true / np.sum(hist_true)
+
     hist_pred = estimator.predict(X)
 
     return -norm(hist_true - hist_pred)
@@ -157,13 +161,13 @@ def find_problem_best_model(train, valid, estimators, params, problem, eval_func
     print(f'started {problem}')
     if search_hyper_params:
         best_estimators = choose_hyper_params(estimators, params, eval_func, train, 'Vote', random_state=seed,
-                                              n_iter=n_iter, wrapper=wrapper)
+                                              n_iter=n_iter, wrapper=wrapper, verbose=verbose)
         save_problem_hyper_params(best_estimators, problem)
     else:
         best_estimators = load_problem_hyper_params(estimators, problem, verbose=verbose)
 
     print_best_hyper_params(best_estimators, problem)
-    best_estimator = choose_best_model(best_estimators, valid, evaluate_voters_division, verbose=verbose)
+    best_estimator = choose_best_model(best_estimators, valid, eval_func, verbose=verbose)
     print_best_model(best_estimator, problem)
 
     return best_estimator

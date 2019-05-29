@@ -118,9 +118,9 @@ def use_estimators(best_estimators, train, valid, test):
     pred_percantages = best_election_res.predict(train[features]) * 100
     true_percantages = test['Vote'].value_counts() / len(test.index) * 100
     print('The predicted distribution of votes across the parties is:')
-    print(pred_percantages)
+    pprint(pred_percantages)
     print('The true distribution of votes across the parties is:')
-    print(true_percantages)
+    pprint(true_percantages[pred_percantages.index])
     print('')
 
     # predict likely voters
@@ -129,9 +129,9 @@ def use_estimators(best_estimators, train, valid, test):
     pred_likely_voters = best_likely_voters_model.predict(test[features])
     actual_voters = {party: test['Vote'].index[test['Vote'] == party] for party in non_test_data['Vote'].unique()}
     print('Predicted likely voter indices per party:')
-    pprint(pred_likely_voters)
+    print(pred_likely_voters)
     print('Actual voter indices per party:')
-    pprint(actual_voters)
+    print(actual_voters)
     print('')
 
 
@@ -143,7 +143,7 @@ def main():
     test = pd.read_csv('test_processed.csv')
 
     verbose = True
-    search_hyper_params = True
+    search_hyper_params = False
 
     best_models = find_best_models(train, valid, verbose=verbose, search_hyper_params=search_hyper_params)
     use_estimators(best_models, train, valid, test)

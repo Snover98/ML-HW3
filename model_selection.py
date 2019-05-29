@@ -160,7 +160,10 @@ def find_problem_best_model(train, valid, estimators, params, problem, eval_func
                                               n_iter=n_iter, wrapper=wrapper, verbose=verbose)
         save_problem_hyper_params(best_estimators, problem)
     else:
-        best_estimators = load_problem_hyper_params(estimators, problem, verbose=verbose)
+        best_estimators = load_problem_hyper_params(estimators, problem, verbose=verbose, wrapper=wrapper)
+        y_train, X_train = target_features_split(train, 'Vote')
+        for estimator in best_estimators:
+            estimator.fit(X_train, y_train)
 
     print_best_hyper_params(best_estimators, problem)
     best_estimator = choose_best_model(best_estimators, valid, eval_func, verbose=verbose)

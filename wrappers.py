@@ -58,7 +58,7 @@ class LikelyVotersWrapper(BaseEstimator):
     # that contains the prob of every voter to vote to any of the partys , will list voters that their predicted
     # prob to vote for the given party is above the threshold
     def _get_party_likely_voters(self, df: pd.DataFrame, probs_predictions: pd.DataFrame, party: str):
-        return list(df.index[probs_predictions[party] > self.threshold])
+        return df.index[probs_predictions[party] > self.threshold]
 
     # if a party is given returns the most likely voters to vote for the party
     # if no party was given it will return the most likely voters to vote for every party
@@ -71,6 +71,7 @@ class LikelyVotersWrapper(BaseEstimator):
             return self._get_party_likely_voters(df, probs_predictions, party)
 
         likely_voters = {tar: self._get_party_likely_voters(df, probs_predictions, tar) for tar in self.targets}
-        likely_voters.update({None: list(df.index.difference(sum(likely_voters.values(), [])))})
+        used_indices = [list(indices) for indices in likely_voters.values()]
+        likely_voters.update({None: df.index.difference(sum(used_indices, []))})
 
         return likely_voters

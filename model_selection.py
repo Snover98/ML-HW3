@@ -81,14 +81,14 @@ def upsample(df: pd.DataFrame, target: str) -> pd.DataFrame:
 
 def target_features_split(df: pd.DataFrame, target: str):
     features = list(set(df.columns.to_numpy().tolist()).difference({target}))
-    return df[target], df[features]
+    return df[features], df[target]
 
 
 def cross_valid(model, df: pd.DataFrame, num_folds: int, eval_func):
     kf = StratifiedKFold(n_splits=num_folds)
     score = 0
 
-    df_targets, df_features = target_features_split(df, 'Vote')
+    df_features, df_targets = target_features_split(df, 'Vote')
 
     for train_indices, test_indices in kf.split(df_features, df_targets):
         train_targets, train_features = df_targets[train_indices], df_features.iloc[train_indices]
@@ -104,8 +104,8 @@ def choose_best_model(models, valid: pd.DataFrame, eval_func, verbose: bool = Fa
     best_score = -np.inf
     best_model = None
 
-    # train_targets, train_features = target_features_split(train, 'Vote')
-    valid_targets, valid_features = target_features_split(valid, 'Vote')
+    # train_features, train_targets = target_features_split(train, 'Vote')
+    valid_features, valid_targets = target_features_split(valid, 'Vote')
 
     for model in models:
         # model.fit(train_features, train_targets)
@@ -125,13 +125,20 @@ def wrapper_params(params: dict):
     return {'model__' + key: value for key, value in params.items()}
 
 
-def choose_hyper_params(models, params_ranges, eval_func, df, target='Vote', num_folds=3, wrapper=None,
+def is_model_balanced(model) -> bool:
+    params = get_normal_params(model.get_params())
+    return 'class_weight' in params.keys() and params['class_weight'] == 'balanced'
+
+
+def model_train_set(model, train, target):
+    return train if is_model_balanced(model) else upsample(train, target)
+
+
+def choose_hyper_params(models, params_ranges, eval_func, train, target='Vote', num_folds=3, wrapper=None,
                         random_state=None, n_iter=10, verbose=False):
     used_models = models
     if wrapper is not None:
         used_models = [wrapper(model) for model in models]
-
-    y, X = target_features_split(df, target)
 
     best_models = []
     for model, params in zip(used_models, params_ranges):
@@ -144,7 +151,8 @@ def choose_hyper_params(models, params_ranges, eval_func, df, target='Vote', num
 
         grid = RandomizedSearchCV(model, used_params, scoring=eval_func, cv=num_folds, random_state=random_state,
                                   n_iter=n_iter, n_jobs=-1)
-        grid.fit(X, y)
+
+        grid.fit(*target_features_split(model_train_set(model, train, target), target))
         best_models.append(grid.best_estimator_)
 
     return best_models
@@ -152,7 +160,6 @@ def choose_hyper_params(models, params_ranges, eval_func, df, target='Vote', num
 
 def find_problem_best_model(train, valid, estimators, params, problem, eval_func, wrapper, n_iter=10, seed=None,
                             search_hyper_params=True, verbose=False):
-    # normal problem
     print('============================================')
     print(f'started {problem}')
     if search_hyper_params:
@@ -161,9 +168,8 @@ def find_problem_best_model(train, valid, estimators, params, problem, eval_func
         save_problem_hyper_params(best_estimators, problem)
     else:
         best_estimators = load_problem_hyper_params(estimators, problem, verbose=verbose, wrapper=wrapper)
-        y_train, X_train = target_features_split(train, 'Vote')
         for estimator in best_estimators:
-            estimator.fit(X_train, y_train)
+            estimator.fit(*target_features_split(model_train_set(estimator, train, 'Vote'), 'Vote'))
 
     print_best_hyper_params(best_estimators, problem)
     best_estimator = choose_best_model(best_estimators, valid, eval_func, verbose=verbose)

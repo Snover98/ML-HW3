@@ -98,9 +98,11 @@ def use_estimators(best_estimators, train, valid, test):
     best_normal.fit(non_test_data[features], non_test_data['Vote'])
     test_pred = pd.Series(best_normal.predict(test[features]), index=test.index)
     test_true = test['Vote']
-    conf_matrix = confusion_matrix(test_true, test_pred, non_test_data['Vote'].unique())
+    parties = non_test_data['Vote'].unique()
+    conf_matrix = pd.DataFrame(confusion_matrix(test_true, test_pred, parties), columns=parties, index=parties)
     print('The confusion matrix is:')
-    print(conf_matrix)
+    with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+        print(conf_matrix)
     print('')
     test_pred.to_csv('test_predictions.csv', index=False)
 

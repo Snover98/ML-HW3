@@ -100,6 +100,12 @@ def plot_confusion_matrix(y_true, y_pred, classes,
     return ax
 
 
+def print_likely_voters(likely_voters):
+    with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+        for index, value in likely_voters.iteritems():
+            print(f'{index}: {list(value)}')
+
+
 def find_best_models(train, valid, search_hyper_params=True, verbose=False):
     seed = np.random.randint(2 ** 31)
     print(f'seed is {seed}')
@@ -149,23 +155,21 @@ def use_estimators(best_estimators, train, valid, test):
     non_test_data = pd.concat((train, valid))
 
     # data for the final classifier
+    print('')
     print('============================================')
-    best_normal.fit(non_test_data[features], non_test_data['Vote'])
+    best_normal.fit(*target_features_split(non_test_data, 'Vote'))
     test_pred = pd.Series(best_normal.predict(test[features]), index=test.index)
     test_true = test['Vote']
     parties = non_test_data['Vote'].unique()
     conf_matrix = pd.DataFrame(confusion_matrix(test_true, test_pred, parties), columns=parties, index=parties)
     #print('The confusion matrix is:')
     plot_confusion_matrix(test_true, test_pred, parties)
-    
-    #with pd.option_context('display.max_rows', None, 'display.max_columns', None):
-        #print(conf_matrix)
     print('')
     test_pred.to_csv('test_predictions.csv', index=False)
 
     # predict elections winner
     print('============================================')
-    best_election_win.fit(non_test_data[features], non_test_data['Vote'])
+    best_election_win.fit(*target_features_split(non_test_data, 'Vote'))
     pred_election_winner = best_election_win.predict(test[features])
     true_election_winner = test['Vote'].value_counts().idxmax()
     print(f'The predicted elections winner is {pred_election_winner} and the actual winner is {true_election_winner}')
@@ -173,7 +177,7 @@ def use_estimators(best_estimators, train, valid, test):
 
     # predict elections results
     print('============================================')
-    best_election_res.fit(non_test_data[features], non_test_data['Vote'])
+    best_election_res.fit(*target_features_split(non_test_data, 'Vote'))
     pred_percantages = best_election_res.predict(train[features]) * 100
     true_percantages = test['Vote'].value_counts() / len(test.index) * 100
     print('The predicted distribution of votes across the parties is:')
@@ -184,13 +188,14 @@ def use_estimators(best_estimators, train, valid, test):
 
     # predict likely voters
     print('============================================')
-    best_likely_voters_model.fit(non_test_data[features], non_test_data['Vote'])
+    best_likely_voters_model.fit(*target_features_split(non_test_data, 'Vote'))
     pred_likely_voters = best_likely_voters_model.predict(test[features])
-    actual_voters = {party: test['Vote'].index[test['Vote'] == party] for party in non_test_data['Vote'].unique()}
+    actual_voters = likely_voters_series({party: test['Vote'].index[test['Vote'] == party] for party in non_test_data['Vote'].unique()})
     print('Predicted likely voter indices per party:')
-    print(pred_likely_voters)
+    print_likely_voters(pred_likely_voters)
+    print('')
     print('Actual voter indices per party:')
-    print(actual_voters)
+    print_likely_voters(actual_voters)
     print('')
 
 

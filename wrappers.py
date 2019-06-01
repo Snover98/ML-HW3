@@ -3,6 +3,10 @@ import pandas as pd
 from sklearn.base import BaseEstimator
 
 
+def likely_voters_series(voters_dict: dict) -> pd.Series:
+    return pd.Series(list(voters_dict.values()), index=list(voters_dict.keys()))
+    
+
 class ElectionsResultsWrapper(BaseEstimator):
     """a wrapper for a model to the problem of predicting the distribution of votes between parties"""
 
@@ -86,4 +90,4 @@ class LikelyVotersWrapper(BaseEstimator):
         used_indices = [list(indices) for indices in likely_voters.values()]
         likely_voters.update({None: df.index.difference(sum(used_indices, []))})
 
-        return likely_voters
+        return likely_voters_series(likely_voters)

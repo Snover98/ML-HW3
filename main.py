@@ -7,8 +7,8 @@ from sklearn.metrics import confusion_matrix
 from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier
 import matplotlib.pyplot as plt
-from sklearn.utils.multiclass import unique_labels
 from pprint import pprint
+from argparse import ArgumentParser
 
 
 class LogUniform:
@@ -161,8 +161,6 @@ def use_estimators(best_estimators, train, valid, test):
     test_pred = pd.Series(best_normal.predict(test[features]), index=test.index)
     test_true = test['Vote']
     parties = non_test_data['Vote'].unique()
-    conf_matrix = pd.DataFrame(confusion_matrix(test_true, test_pred, parties), columns=parties, index=parties)
-    #print('The confusion matrix is:')
     plot_confusion_matrix(test_true, test_pred, parties)
     print('')
     test_pred.to_csv('test_predictions.csv', index=False)
@@ -178,19 +176,20 @@ def use_estimators(best_estimators, train, valid, test):
     # predict elections results
     print('============================================')
     best_election_res.fit(*target_features_split(non_test_data, 'Vote'))
-    pred_percantages = best_election_res.predict(train[features]) * 100
-    true_percantages = test['Vote'].value_counts() / len(test.index) * 100
+    pred_percentages = best_election_res.predict(train[features]) * 100
+    true_percentages = test['Vote'].value_counts() / len(test.index) * 100
     print('The predicted distribution of votes across the parties is:')
-    pprint(pred_percantages)
+    pprint(pred_percentages)
     print('The true distribution of votes across the parties is:')
-    pprint(true_percantages[pred_percantages.index])
+    pprint(true_percentages[pred_percentages.index])
     print('')
 
     # predict likely voters
     print('============================================')
     best_likely_voters_model.fit(*target_features_split(non_test_data, 'Vote'))
     pred_likely_voters = best_likely_voters_model.predict(test[features])
-    actual_voters = likely_voters_series({party: test['Vote'].index[test['Vote'] == party] for party in non_test_data['Vote'].unique()})
+    actual_voters = likely_voters_series(
+        {party: test['Vote'].index[test['Vote'] == party] for party in non_test_data['Vote'].unique()})
     print('Predicted likely voter indices per party:')
     print_likely_voters(pred_likely_voters)
     print('')
@@ -200,14 +199,22 @@ def use_estimators(best_estimators, train, valid, test):
 
 
 def main():
-    # train, valid, test = prepare_data()
+    parser = ArgumentParser()
+    parser.add_argument('--verbose', '-v', action='store_true', dest='verbose', default=False)
+    parser.add_argument('--search_hyper_params', '-s', action='store_true', dest='search_hyper_params', default=False)
+    parser.add_argument('--preprocess_data', '-p', action='store_true', dest='preprocess_data', default=False)
 
-    train = pd.read_csv('train_processed.csv')
-    valid = pd.read_csv('valid_processed.csv')
-    test = pd.read_csv('test_processed.csv')
+    args = vars(parser.parse_args())
 
-    verbose = True
-    search_hyper_params = False
+    if args['preprocess_data']:
+        train, valid, test = prepare_data()
+    else:
+        train = pd.read_csv('train_processed.csv')
+        valid = pd.read_csv('valid_processed.csv')
+        test = pd.read_csv('test_processed.csv')
+
+    verbose = args['verbose']
+    search_hyper_params = args['search_hyper_params']
 
     best_models = find_best_models(train, valid, verbose=verbose, search_hyper_params=search_hyper_params)
     use_estimators(best_models, train, valid, test)
